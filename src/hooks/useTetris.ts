@@ -3,20 +3,26 @@
 // it also handles user inputs and the game logic like keeping score:
 // - the tick-function: it runs periodically
 // - commit function: make the falling Block as part of the Board
+// - handle key events to control the game (using useEffect)
+// - checking full rows and counting scores
 
-import { useCallback, useState } from "react";
-import { getRandomBlock, hasCollisions, useTetrisBoard } from "./useTetrisBoard";
+import { useCallback, useEffect, useState } from "react";
+import { getRandomBlock, hasCollisions, useTetrisBoard, BOARD_HEIGHT, BOARD_WIDTH } from "./useTetrisBoard";
 import { useInterval } from "./useInterval";
-import { Block, BlockShape, BoardShape } from "../types";
+import { Block, BlockShape, BoardShape, EmptyCell } from "../types";
 
+
+// higher value >> slower dropping
 enum TickSpeed {
     Normal = 800,
-    Sliding = 100
+    Sliding = 100,
+    Fast = 50
 }
 
 export function useTetris() {
 
-    const [isPlaying, setIsPlaying] = useState(false);
+    const [score, setScore] = useState<number>(0);
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
     const [tickSpeed, setTickSpeed] = useState<TickSpeed | null>(null);
     const [isCommitting, setIsCommitting] = useState<boolean>(false);
     const [upcomingBlocks, setUpcomingBlocks] = useState<Block[]>([]);
@@ -58,12 +64,24 @@ export function useTetris() {
         droppingShape
         );
         
-        const newUpcomingBlocks = structuredClone(upcomingBlocks) as Block[];
-        const newBlock = newUpcomingBlocks.pop() as Block;
-        newUpcomingBlocks.unshift( getRandomBlock() );
-        
-        setTickSpeed(TickSpeed.Normal);                             // set normal tick speed back + end of commit phase
+        // checking full rows
+        let numCleared = 0;
+        for (let row = BOARD_HEIGHT - 1; row >=0; row--) {
+            if (newBoard[row].every((entry) => entry !== EmptyCell.Empty)) {
+                newBoard.splice(row, 1);
+                newBoard.unshift( Array(BOARD_WIDTH).fill(EmptyCell.Empty) );
+                numCleared++;
+            }
+        }
+
+        // managing the array of upcoming Blocks
+        const newUpcomingBlocks = structuredClone(upcomingBlocks) as Block[];   // clone it
+        const newBlock = newUpcomingBlocks.pop() as Block;                      // get next Block out of it
+        newUpcomingBlocks.unshift( getRandomBlock() );                          // create a new one in the array
         setUpcomingBlocks(newUpcomingBlocks);
+        
+        // normal speed, "commit" action
+        setTickSpeed(TickSpeed.Normal);                             // set normal tick speed back + end of commit phase
         dispatchBoardState({type: "commit", newBoard, newBlock});                       // call "commit" action of state manager
         setIsCommitting(false);
     }, [ board,
@@ -72,7 +90,58 @@ export function useTetris() {
         droppingRow,
         droppingColumn,
         dispatchBoardState,
-        upcomingBlocks ]);
+        upcomingBlocks ]
+    );
+
+    // Keyboard events for moving the actual Block
+    useEffect(() => {
+        if (!isPlaying) return;
+
+        // ArrowDown >> make dropping fast
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.repeat) return;
+
+            if (event.key === 'ArrowDown') {
+                setTickSpeed(TickSpeed.Fast);
+            }
+            if (event.key === 'ArrowUp') {
+                dispatchBoardState({
+                    type: 'move',
+                    isRotating: true
+                });
+            }
+            if (event.key === 'ArrowLeft') {
+                dispatchBoardState({
+                    type: 'move',
+                    isPressingLeft: true
+                });
+            }
+            if (event.key === 'ArrowRight') {
+                dispatchBoardState({
+                    type: 'move',
+                    isPressingRight: true
+                });
+            }
+        }
+        document.addEventListener('keydown', handleKeyDown);
+
+        // ArrowUp >> make dropping normal
+        const handleKeyUp = (event: KeyboardEvent) => {
+            if (event.key === 'ArrowDown') {
+                setTickSpeed(TickSpeed.Normal);
+            }
+        }
+        document.addEventListener('keyup', handleKeyUp);
+        
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('keyup', handleKeyUp);
+            setTickSpeed(TickSpeed.Normal);
+        };
+
+    }, [isPlaying])
+
+
     
     // the function that runs at every tick...
     const gameTick = useCallback(() => {
@@ -100,7 +169,6 @@ export function useTetris() {
         gameTick();
     }, tickSpeed);
     
-
     
     const renderedBoard = structuredClone(board) as BoardShape;
 
@@ -119,10 +187,12 @@ export function useTetris() {
     return {
         board: renderedBoard,
         startGame,
-        isPlaying
+        isPlaying,
+        score
     };
 }
 
+// Outer helper function -
 // Commit: the Block will be a part of the Board
 function addShapeToBoard(
     board: BoardShape,
@@ -132,7 +202,7 @@ function addShapeToBoard(
     droppingShape: BlockShape
 ) { 
     droppingShape
-        .filter((row) => row.some((isSet) => isSet))
+        .filter((row) => row.some((isSet) => isSet))    // sort out rows with only void cells ("false" in Shape)
         .forEach((row: boolean[], rowIndex: number) => {
             row.forEach((isSet: boolean, colIndex: number) => {
                 if (isSet) {

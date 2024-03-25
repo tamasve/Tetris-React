@@ -1,8 +1,8 @@
 import { useReducer } from "react";
 import { Block, BlockShape, BoardShape, EmptyCell, SHAPES } from "../types"
 
-const BOARD_WIDTH = 12;
-const BOARD_HEIGHT = 20;
+export const BOARD_WIDTH = 12;
+export const BOARD_HEIGHT = 20;
 
 export type BoardState = {
     board: BoardShape;      // actual entire board
@@ -87,10 +87,34 @@ export function getEmptyBoard(height = BOARD_HEIGHT): BoardShape {
     .map(() => Array(BOARD_WIDTH).fill(EmptyCell.Empty));
 }
 
+// Rotate Shape right
+function rotateBlock(shape: BlockShape): BlockShape {
+    const rows = shape.length;
+    const columns = shape[0].length;
+
+    const rotated = Array(rows)         // a new void array of the same dimensions as 'shape'
+        .fill(null)
+        .map(() => Array(columns).fill(false));
+
+    for (let row = 0; row < rows; row++) {
+        for (let column = 0; column < columns; column++) {
+            rotated[column][rows - 1 - row] = shape[row][column];
+        }
+    }
+    
+    return rotated;
+}
+
+
+// Action for the Reducer
+
 type Action = {
     type: "start" | "drop" | "commit" | "move",
     newBoard?: BoardShape,
-    newBlock?: Block
+    newBlock?: Block,
+    isPressingLeft?: boolean,
+    isPressingRight?: boolean,
+    isRotating?: boolean
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -122,6 +146,23 @@ function boardReducer(state: BoardState, action: Action): BoardState {
                 droppingShape: SHAPES[action.newBlock!].shape
             }
         case "move":
+            const rotatedShape = action.isRotating      // rotate if necessary
+                ? rotateBlock(newState.droppingShape)
+                : newState.droppingShape;
+
+            let columnOffset = action.isPressingLeft ? -1 : 0;  // column offset if necessary
+            columnOffset = action.isPressingRight ? 1 : columnOffset;
+
+            if (!hasCollisions(                         // check collision in the new position / of the new rotation
+                newState.board,
+                rotatedShape,
+                newState.droppingRow,
+                newState.droppingColumn + columnOffset
+            )) {
+                newState.droppingColumn += columnOffset;
+                newState.droppingShape = rotatedShape;
+            }
+            break;
         default:
             const unhandledType: never | string = action.type;
             throw new Error(`Unhandled action type: ${unhandledType}`);
