@@ -2,11 +2,12 @@ import { CellOptions } from "../types";
 
 interface Props {
     type: CellOptions;
+    extraClass?: string              // for the upcoming blocks UI on the right
 }
 
-function Cell({type}: Props) {
+function Cell({type, extraClass}: Props) {
     return (
-        <div className={`cell ${type}`}></div>
+        <div className={`cell ${type} ${extraClass}`}></div>
     )
 }
 

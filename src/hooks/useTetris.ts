@@ -9,12 +9,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { getRandomBlock, hasCollisions, useTetrisBoard, BOARD_HEIGHT, BOARD_WIDTH } from "./useTetrisBoard";
 import { useInterval } from "./useInterval";
-import { Block, BlockShape, BoardShape, EmptyCell } from "../types";
+import { Block, BlockShape, BoardShape, EmptyCell, SHAPES } from "../types";
 
 
 // higher value >> slower dropping
 enum TickSpeed {
-    Normal = 800,
+    Normal = 600,
     Sliding = 100,
     Fast = 50
 }
@@ -63,24 +63,30 @@ export function useTetris() {
         droppingBlock,
         droppingShape
         );
-        
+                                
         // checking full rows
         let numCleared = 0;
         for (let row = BOARD_HEIGHT - 1; row >=0; row--) {
             if (newBoard[row].every((entry) => entry !== EmptyCell.Empty)) {    // if no empty cell in a row...
                 newBoard.splice(row, 1);                                        // clear it...
-                newBoard.unshift( Array(BOARD_WIDTH).fill(EmptyCell.Empty) );   // insert a new empty row on top
                 numCleared++;                                                   // score
             }
         }
 
         // managing the array of upcoming Blocks
-        const newUpcomingBlocks = structuredClone(upcomingBlocks) as Block[];   // clone it
-        const newBlock = newUpcomingBlocks.pop() as Block;                      // get next Block out of it
-        newUpcomingBlocks.unshift( getRandomBlock() );                          // create a new one in the array
+        const newUpcomingBlocks = structuredClone(upcomingBlocks) as Block[];   // clone the array of upcoming blocks
+        const newBlock = newUpcomingBlocks.shift() as Block;                      // get next Block out of it
+        newUpcomingBlocks.push( getRandomBlock() );                          // create a new one in the array
+
+        if (hasCollisions(board, SHAPES[newBlock].shape, 0, 3)) {
+            setIsPlaying(false);
+            setTickSpeed(null);
+        }
+
         setUpcomingBlocks(newUpcomingBlocks);
         
-        // normal speed, "commit" action
+        // scoring, normal speed, "commit" action
+        setScore((prevScore) => prevScore += getPoints(numCleared));
         setTickSpeed(TickSpeed.Normal);                             // set normal tick speed back + end of commit phase
         dispatchBoardState({type: "commit", newBoard, newBlock});                       // call "commit" action of state manager
         setIsCommitting(false);
@@ -150,7 +156,7 @@ export function useTetris() {
         } else if (
             hasCollisions(board, droppingShape, droppingRow + 1, droppingColumn)    // check collision for the next row
         ) {
-            setTickSpeed(TickSpeed.Sliding);        // collision: slowering + committing (still a chance for the user to slide the block)
+            setTickSpeed(TickSpeed.Sliding);        // collision: make it faster + committing (still a chance for the user to slide the block)
             setIsCommitting(true);
         } else {
             dispatchBoardState({type: 'drop'});     // no collision: drop forward
@@ -188,11 +194,13 @@ export function useTetris() {
         board: renderedBoard,
         startGame,
         isPlaying,
-        score
+        score,
+        upcomingBlocks
     };
 }
 
-// Outer helper function -
+// -- Outer helper functions --
+
 // Commit: the Block will be a part of the Board
 function addShapeToBoard(
     board: BoardShape,
@@ -211,4 +219,16 @@ function addShapeToBoard(
             })
 
         });
+}
+
+// Scoring
+function getPoints(numCleared: number): number {
+    switch(numCleared) {
+        case 0: return 0;
+        case 1: return 100;
+        case 2: return 300;
+        case 3: return 500;
+        case 4: return 800;
+        default: throw new Error("Unexpected number of rows cleared");
+    }
 }

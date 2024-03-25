@@ -12,6 +12,7 @@ export type BoardState = {
     droppingShape: BlockShape;  // cell by cell state of the actual shape (even holding rotated position)
 }
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // The main board manager using useReducer
 
 export function useTetrisBoard(): [BoardState, React.Dispatch<Action>] {
@@ -42,6 +43,8 @@ export function useTetrisBoard(): [BoardState, React.Dispatch<Action>] {
 
     return [boardState, dispatchBoardState];
 }
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // HELPER FUNCTIONS...
 
@@ -81,8 +84,9 @@ export function hasCollisions(
     return hasCollision;
 }
 
+// create an empty 2D array
 export function getEmptyBoard(height = BOARD_HEIGHT): BoardShape {
-    return Array(height)         // empty 2D array
+    return Array(height)
     .fill(null)
     .map(() => Array(BOARD_WIDTH).fill(EmptyCell.Empty));
 }
@@ -139,7 +143,10 @@ function boardReducer(state: BoardState, action: Action): BoardState {
             break;
         case "commit":
             return {
-                board: action.newBoard as BoardShape,
+                board: [
+                    ...getEmptyBoard(BOARD_HEIGHT - action.newBoard!.length),   // insert a new empty row on the top for every cleared one
+                    ...action.newBoard!
+                ],
                 droppingRow: 0,
                 droppingColumn: 3,
                 droppingBlock: action.newBlock!,

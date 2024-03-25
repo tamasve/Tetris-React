@@ -18,8 +18,8 @@ h1 {
 .board {
     border: 2px solid black;
     user-select: none;
-    margin: auto;
-    /* width: fit-content;  grid-template-area makes it superfluous */
+    margin: 2em auto;
+    width: fit-content;  /* grid-template-area makes it superfluous for the Board, but it is necessary for the UpcomingBlocks */
     grid-area: game;
 }
 
@@ -63,4 +63,15 @@ h1 {
 
 .cell.Z {
     background-color: rgb(227,78,78);
+}
+
+/* hideEmpty class: for the upcoming blocks UI on the right */
+
+.cell.Empty.hideEmpty {
+    background-color: transparent;
+    border: none;
+}
+
+.board.hideEmpty {
+    border: none;
 }
