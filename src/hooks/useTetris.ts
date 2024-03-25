@@ -67,10 +67,10 @@ export function useTetris() {
         // checking full rows
         let numCleared = 0;
         for (let row = BOARD_HEIGHT - 1; row >=0; row--) {
-            if (newBoard[row].every((entry) => entry !== EmptyCell.Empty)) {
-                newBoard.splice(row, 1);
-                newBoard.unshift( Array(BOARD_WIDTH).fill(EmptyCell.Empty) );
-                numCleared++;
+            if (newBoard[row].every((entry) => entry !== EmptyCell.Empty)) {    // if no empty cell in a row...
+                newBoard.splice(row, 1);                                        // clear it...
+                newBoard.unshift( Array(BOARD_WIDTH).fill(EmptyCell.Empty) );   // insert a new empty row on top
+                numCleared++;                                                   // score
             }
         }
 
