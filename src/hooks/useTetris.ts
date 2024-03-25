@@ -11,13 +11,18 @@ import { getRandomBlock, hasCollisions, useTetrisBoard, BOARD_HEIGHT, BOARD_WIDT
 import { useInterval } from "./useInterval";
 import { Block, BlockShape, BoardShape, EmptyCell, SHAPES } from "../types";
 
-
 // higher value >> slower dropping
 enum TickSpeed {
     Normal = 600,
     Sliding = 100,
     Fast = 50
 }
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// The main game manager using useTetrisBoard
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 
 export function useTetris() {
 
@@ -31,7 +36,7 @@ export function useTetris() {
     const [
         {board, droppingRow, droppingColumn, droppingBlock, droppingShape},
         dispatchBoardState
-    ] = useTetrisBoard();
+        ] = useTetrisBoard();
 
     
     // Starting the game...
@@ -98,6 +103,7 @@ export function useTetris() {
         dispatchBoardState,
         upcomingBlocks ]
     );
+
 
     // Keyboard events for moving the actual Block
     useEffect(() => {
@@ -176,6 +182,9 @@ export function useTetris() {
     }, tickSpeed);
     
     
+    // ~~~~~~~~~~
+    // Rendering
+
     const renderedBoard = structuredClone(board) as BoardShape;
 
     if (isPlaying) {    // Commit: the Block will be a part of the Board
@@ -187,8 +196,6 @@ export function useTetris() {
             droppingShape
         );
     };
-
-
 
     return {
         board: renderedBoard,

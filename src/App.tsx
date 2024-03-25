@@ -1,10 +1,6 @@
-import { useState } from 'react'
 import Board from './component/Board'
-import { EmptyCell } from './types'
 import { useTetris } from './hooks/useTetris'
 import UpcomingBlocks from './hooks/UpcomingBlocks';
-
-// import './App.css'
 
 
 function App() {
