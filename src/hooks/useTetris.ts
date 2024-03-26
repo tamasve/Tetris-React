@@ -12,10 +12,11 @@ import { useInterval } from "./useInterval";
 import { Block, BlockShape, BoardShape, EmptyCell, SHAPES } from "../types";
 
 // higher value >> slower dropping
-enum TickSpeed {
+export enum TickSpeed {
     Normal = 600,
     Sliding = 100,
-    Fast = 50
+    Fast = 50,
+    Paused = 60000
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -27,6 +28,7 @@ enum TickSpeed {
 export function useTetris() {
 
     const [score, setScore] = useState<number>(0);
+    const [pieces, setPieces] = useState<number>(1);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
     const [tickSpeed, setTickSpeed] = useState<TickSpeed | null>(null);
     const [isCommitting, setIsCommitting] = useState<boolean>(false);
@@ -51,6 +53,11 @@ export function useTetris() {
         setTickSpeed(TickSpeed.Normal);
         dispatchBoardState({type: 'start'});
     }, [dispatchBoardState]);
+
+    const pauseGame = useCallback(() => {
+        if (tickSpeed === TickSpeed.Paused )  setTickSpeed(TickSpeed.Normal);
+        else setTickSpeed(TickSpeed.Paused);
+    }, [tickSpeed])
     
     // Committing a Block into the Board...
     const commitPosition = useCallback(() => {
@@ -92,9 +99,11 @@ export function useTetris() {
         
         // scoring, normal speed, "commit" action
         setScore((prevScore) => prevScore += getPoints(numCleared));
+        setPieces((pieces) => pieces + 1);
         setTickSpeed(TickSpeed.Normal);                             // set normal tick speed back + end of commit phase
         dispatchBoardState({type: "commit", newBoard, newBlock});                       // call "commit" action of state manager
         setIsCommitting(false);
+
     }, [ board,
         droppingBlock,
         droppingShape,
@@ -200,9 +209,12 @@ export function useTetris() {
     return {
         board: renderedBoard,
         startGame,
+        pauseGame,
         isPlaying,
         score,
-        upcomingBlocks
+        pieces,
+        upcomingBlocks,
+        tickSpeed
     };
 }
 

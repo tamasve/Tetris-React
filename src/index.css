@@ -1,3 +1,6 @@
+:root{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 .App {
     display: grid;
     grid-template-areas: 
@@ -9,6 +12,19 @@
 h1 {
     text-align: center;
     grid-area: title;
+    font-size: 3em;
+    font-style: oblique;
+}
+
+button {
+    background-color: blueviolet;
+    color: white;
+    font: inherit;
+    font-size: 1em;
+    border-radius: 0.5em;
+    border: none;
+    padding: 0.5em;
+    cursor:pointer
 }
 
 .controls {
@@ -23,6 +39,16 @@ h1 {
     grid-area: game;
 }
 
+.upcoming {
+    display: flex;
+}
+
+.upcoming span {
+    font-size: 3em;
+    font-weight: bold;
+    padding-top: 1em;
+}
+
 .row {
     display: flex;
 }
@@ -30,39 +56,74 @@ h1 {
 .cell {
     width: 30px;
     aspect-ratio: 1;
-    border: 1px solid black;
+    border: 1px solid rgb(153, 153, 153);
 }
 
 .cell.Empty {
-    background-color: rgb(200,200,200);
+    background-color: rgb(226, 223, 223);
 }
 
 .cell.I {
-    background-color: rgb(80,227,230);
+    /* background-color: rgb(80,227,230); */
+    background: linear-gradient(rgb(203, 230, 230), rgb(80,227,230));
+    border-top: 1px solid rgb(140, 216, 216);
+    border-bottom: 1px solid rgb(80,227,230);
+    border-left: 1px solid rgb(203, 230, 230);
+    border-right: 1px solid rgb(80,227,230);
 }
 
 .cell.J {
-    background-color: rgb(36,95,223);
+    /* background-color: rgb(36,95,223); */
+    background: linear-gradient(rgb(183, 198, 231), rgb(36,95,223));
+    border-top: 1px solid rgb(130, 161, 228);
+    border-bottom: 1px solid rgb(36,95,223);
+    border-left: 1px solid rgb(183, 198, 231);
+    border-right: 1px solid rgb(36,95,223);
 }
 
 .cell.L {
-    background-color: rgb(223,173,36);
+    /* background-color: rgb(223,173,36); */
+    background: linear-gradient(rgb(238, 220, 170), rgb(226, 173, 25));
+    border-top: 1px solid rgb(231, 205, 134);
+    border-bottom: 1px solid rgb(223,173,36);
+    border-left: 1px solid rgb(238, 220, 170);
+    border-right: 1px solid rgb(223,173,36);
 }
 
 .cell.O {
-    background-color: rgb(223,217,36);
+    /* background-color: rgb(223,217,36); */
+    background: linear-gradient(rgb(240, 237, 166), rgb(228, 221, 19));
+    border-top: 1px solid rgb(241, 237, 121);
+    border-bottom: 1px solid rgb(228, 221, 19);
+    border-left: 1px solid rgb(240, 237, 166);
+    border-right: 1px solid rgb(228, 221, 19);
 }
 
 .cell.S {
-    background-color: rgb(48,211,56);
+    /* background-color: rgb(48,211,56); */
+    background: linear-gradient(rgb(190, 240, 193), rgb(48,211,56));
+    border-top: 1px solid rgb(155, 236, 161);
+    border-bottom: 1px solid rgb(48,211,56);
+    border-left: 1px solid rgb(208, 252, 211);
+    border-right: 1px solid rgb(48,211,56);
 }
 
 .cell.T {
-    background-color: rgb(132,61,198);
+    /* background-color: rgb(132,61,198); */
+    background: linear-gradient(rgb(192, 167, 216), rgb(132,61,198));
+    border-top: 1px solid rgb(172, 129, 212);
+    border-bottom: 1px solid rgb(132,61,198);
+    border-left: 1px solid rgb(192, 167, 216);
+    border-right: 1px solid rgb(132,61,198);
 }
 
 .cell.Z {
-    background-color: rgb(227,78,78);
+    /* background-color: rgb(227,78,78); */
+    background: linear-gradient(rgb(240, 193, 193), rgb(228, 62, 62));
+    border-top: 1px solid rgb(241, 146, 146);
+    border-bottom: 1px solid rgb(228, 62, 62);
+    border-left: 1px solid rgb(238, 194, 194);
+    border-right: 1px solid rgb(231, 9, 9);
 }
 
 /* hideEmpty class: for the upcoming blocks UI on the right */
