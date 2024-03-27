@@ -5,7 +5,12 @@ export enum Block {
     O = 'O',
     S = 'S',
     T = 'T',
-    Z = 'Z'
+    Z = 'Z',
+    Q = 'Q',
+    U = 'U',
+    H = 'H',
+    P = 'P',
+    F = 'F',
 }
 
 export enum EmptyCell {
@@ -26,6 +31,11 @@ interface ShapesObj {
     S: {shape: BlockShape};
     T: {shape: BlockShape};
     Z: {shape: BlockShape};
+    Q: {shape: BlockShape};
+    U: {shape: BlockShape};
+    H: {shape: BlockShape};
+    P: {shape: BlockShape};
+    F: {shape: BlockShape};
 }
 
 export const SHAPES: ShapesObj = {
@@ -78,4 +88,44 @@ export const SHAPES: ShapesObj = {
             [false, true, true],
         ]
     },
+
+    /* Extra elements, the last 3 should be generated more rarely than the others */
+
+    Q: {
+        shape: [
+            [true, false, false],
+            [true, true, false],
+            [true, true, false],
+        ]
+    },
+    U: {
+        shape: [
+            [false, false, false],
+            [true, false, true],
+            [true, true, true],
+        ]
+    },
+    H: {
+        shape: [
+            [true, false, false],
+            [true, true, true],
+            [true, false, true],
+        ]
+    },
+    P: {
+        shape: [
+            [false, true, false],
+            [true, true, true],
+            [false, true, false],
+        ]
+    },
+    F: {
+        shape: [
+            [false, false, false, false],
+            [true, false, true, false],
+            [true, true, true, true],
+            [false, false, false, false]
+        ]
+    },
+    
 }

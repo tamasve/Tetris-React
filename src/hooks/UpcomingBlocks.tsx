@@ -16,7 +16,7 @@ export default function UpcomingBlocks({upcomingBlocks}: Props) {
                     .map((row: boolean[], rowIndex: number) => 
                         row.map((cell) => cell ? Block[block] : EmptyCell.Empty));
                 return (
-                    <Board currentBoard={boardShape} extraClass="hideEmpty" />
+                    <Board currentBoard={boardShape} extraClass="hideEmpty" key={blockIndex}/>
                 )
             })}
 

@@ -137,7 +137,7 @@ function boardReducer(state: BoardState, action: Action): BoardState {
             return {
                 board: getEmptyBoard(),
                 droppingRow: 0,
-                droppingColumn: 3,
+                droppingColumn: Math.round((BOARD_WIDTH - SHAPES[firstBlock].shape.length) / 2),    // start drop in the middle
                 droppingBlock: firstBlock,
                 droppingShape: SHAPES[firstBlock].shape
             }
@@ -151,7 +151,7 @@ function boardReducer(state: BoardState, action: Action): BoardState {
                     ...action.newBoard!
                 ],
                 droppingRow: 0,
-                droppingColumn: 3,
+                droppingColumn: Math.round((BOARD_WIDTH - SHAPES[action.newBlock!].shape.length) / 2),    // start drop in the middle
                 droppingBlock: action.newBlock!,
                 droppingShape: SHAPES[action.newBlock!].shape
             }

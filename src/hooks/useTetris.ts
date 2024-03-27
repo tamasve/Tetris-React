@@ -24,7 +24,6 @@ export enum TickSpeed {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-
 export function useTetris() {
 
     const [score, setScore] = useState<number>(0);
@@ -166,9 +165,9 @@ export function useTetris() {
     
     // the function that runs at every tick...
     const gameTick = useCallback(() => {
-        if (isCommitting) {
-            commitPosition();                       // commit the falling block to the current position
-        } else if (
+        if (isCommitting) return commitPosition();                       // commit the falling block to the current position
+
+        if (
             hasCollisions(board, droppingShape, droppingRow + 1, droppingColumn)    // check collision for the next row
         ) {
             setTickSpeed(TickSpeed.Sliding);        // collision: make it faster + committing (still a chance for the user to slide the block)
