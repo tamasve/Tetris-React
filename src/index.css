@@ -168,7 +168,7 @@ button {
     border-right: 1px solid rgb(253, 148, 29);
 }
 
-/* hideEmpty class: for the upcoming blocks UI on the right */
+/* hideEmpty class: for the UpcomingBlocks UI on the right: to see only the Blocks, and the grid be invisible */
 
 .cell.Empty.hideEmpty {
     background-color: transparent;

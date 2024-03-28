@@ -1,4 +1,4 @@
-import Board from "../component/Board";
+import Board from "./Board";
 import { Block, BoardShape, EmptyCell, SHAPES } from "../types";
 
 interface Props {

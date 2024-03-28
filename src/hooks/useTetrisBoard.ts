@@ -105,7 +105,7 @@ function rotateBlock(shape: BlockShape): BlockShape {
 
     for (let row = 0; row < rows; row++) {
         for (let column = 0; column < columns; column++) {
-            rotated[column][rows - 1 - row] = shape[row][column];
+            rotated[column][rows - 1 - row] = shape[row][column];   // rotate right
         }
     }
     
@@ -113,7 +113,7 @@ function rotateBlock(shape: BlockShape): BlockShape {
 }
 
 
-// Action: the actions of the Reducer
+// Action: the actions of the Reducer, and the optional parameters (only used by some actions but not all)
 
 type Action = {
     type: "start" | "drop" | "commit" | "move",
@@ -137,7 +137,7 @@ function boardReducer(state: BoardState, action: Action): BoardState {
             return {
                 board: getEmptyBoard(),
                 droppingRow: 0,
-                droppingColumn: Math.round((BOARD_WIDTH - SHAPES[firstBlock].shape.length) / 2),    // start drop in the middle
+                droppingColumn: Math.round((BOARD_WIDTH - SHAPES[firstBlock].shape.length) / 2),    // start dropping in the middle
                 droppingBlock: firstBlock,
                 droppingShape: SHAPES[firstBlock].shape
             }
@@ -169,7 +169,7 @@ function boardReducer(state: BoardState, action: Action): BoardState {
                 newState.droppingRow,
                 newState.droppingColumn + columnOffset
             )) {
-                newState.droppingColumn += columnOffset;
+                newState.droppingColumn += columnOffset;    // rotation and move only take effect if they does not cause collision
                 newState.droppingShape = rotatedShape;
             }
             break;

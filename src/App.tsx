@@ -1,6 +1,6 @@
 import Board from './component/Board'
 import { TickSpeed, useTetris } from './hooks/useTetris'
-import UpcomingBlocks from './hooks/UpcomingBlocks';
+import UpcomingBlocks from './component/UpcomingBlocks';
 
 
 function App() {

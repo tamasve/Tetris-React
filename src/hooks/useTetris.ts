@@ -2,16 +2,16 @@
 // a wrapper around useTetrisBoard
 // it also handles user inputs and the game logic like keeping score:
 // - the tick-function: it runs periodically
-// - commit function: make the falling Block as part of the Board
+// - commit function: make the falling Block be part of the Board
 // - handle key events to control the game (using useEffect)
-// - checking full rows and counting scores
+// - check full rows and count scores and pieces
 
 import { useCallback, useEffect, useState } from "react";
 import { getRandomBlock, hasCollisions, useTetrisBoard, BOARD_HEIGHT, BOARD_WIDTH } from "./useTetrisBoard";
 import { useInterval } from "./useInterval";
 import { Block, BlockShape, BoardShape, EmptyCell, SHAPES } from "../types";
 
-// higher value >> slower dropping
+// TickSpeed for the setInterval() - higher value >> slower dropping
 export enum TickSpeed {
     Normal = 600,
     Sliding = 100,
@@ -33,7 +33,11 @@ export function useTetris() {
     const [isCommitting, setIsCommitting] = useState<boolean>(false);
     const [upcomingBlocks, setUpcomingBlocks] = useState<Block[]>([]);
 
-    // the main state manager from useTetrisBoard
+    // the main state manager from useTetrisBoard:
+    // - the actual state of board
+    // - the actual position of the dropping Block (topleft corner)
+    // - the actual Block (the identifier letter, as enum)
+    // - the actual shape of the actual Block (the rotated position as a 2dim boolean array)
     const [
         {board, droppingRow, droppingColumn, droppingBlock, droppingShape},
         dispatchBoardState
@@ -53,29 +57,37 @@ export function useTetris() {
         dispatchBoardState({type: 'start'});
     }, [dispatchBoardState]);
 
+    // Toggle the Pause button >> pause the game = set tickSpeed to 1 hour
     const pauseGame = useCallback(() => {
         if (tickSpeed === TickSpeed.Paused )  setTickSpeed(TickSpeed.Normal);
         else setTickSpeed(TickSpeed.Paused);
     }, [tickSpeed])
     
-    // Committing a Block into the Board...
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Committing = building the actual Block into the Board...
+
     const commitPosition = useCallback(() => {
-        if ( !hasCollisions(board, droppingShape, droppingRow + 1, droppingColumn) ) {
+
+        if ( !hasCollisions(board, droppingShape, droppingRow + 1, droppingColumn) ) {    // if no collision: user avoided collision by interacting
             setIsCommitting(false);
             setTickSpeed(TickSpeed.Normal);
             return;
         }
-        // if no collision:
-        const newBoard = structuredClone(board) as BoardShape;      // clone Board
-        addShapeToBoard(                                            // add falling Block to it
-        newBoard,
-        droppingRow,
-        droppingColumn,
-        droppingBlock,
-        droppingShape
+
+        // ** if there is a collision: do all the below changes...
+
+        const newBoard = structuredClone(board) as BoardShape;      // deep copy Board
+
+        addShapeToBoard(                                            // build the actual falling Block into it
+            newBoard,
+            droppingRow,
+            droppingColumn,
+            droppingBlock,
+            droppingShape
         );
                                 
-        // checking full rows
+        // checking full rows, from bottom to top
         let numCleared = 0;
         for (let row = BOARD_HEIGHT - 1; row >=0; row--) {
             if (newBoard[row].every((entry) => entry !== EmptyCell.Empty)) {    // if no empty cell in a row...
@@ -84,12 +96,18 @@ export function useTetris() {
             }
         }
 
-        // managing the array of upcoming Blocks
-        const newUpcomingBlocks = structuredClone(upcomingBlocks) as Block[];   // clone the array of upcoming blocks
-        const newBlock = newUpcomingBlocks.shift() as Block;                      // get next Block out of it
-        newUpcomingBlocks.push( getRandomBlock() );                          // create a new one in the array
+        // managing the array of upcoming Blocks: get next Block, creating a new one at the end
+        const newUpcomingBlocks = structuredClone(upcomingBlocks) as Block[];   // clone the array of upcoming blocks - FIFO
+        const newBlock = newUpcomingBlocks.shift() as Block;                   // get next Block out of it (at the beginning)
+        newUpcomingBlocks.push( getRandomBlock() );                           // add a new one (at the end)
 
-        if (hasCollisions(board, SHAPES[newBlock].shape, 0, 3)) {
+        // check if the new Block has collisions right at the starting position
+        if ( hasCollisions(
+                board,
+                SHAPES[newBlock].shape,
+                0,
+                Math.round((BOARD_WIDTH - SHAPES[newBlock].shape.length) / 2))
+                ) {
             setIsPlaying(false);
             setTickSpeed(null);
         }
@@ -167,13 +185,12 @@ export function useTetris() {
     const gameTick = useCallback(() => {
         if (isCommitting) return commitPosition();                       // commit the falling block to the current position
 
-        if (
-            hasCollisions(board, droppingShape, droppingRow + 1, droppingColumn)    // check collision for the next row
+        if ( hasCollisions(board, droppingShape, droppingRow + 1, droppingColumn)    // check collision for the next row
         ) {
-            setTickSpeed(TickSpeed.Sliding);        // collision: make it faster + committing (still a chance for the user to slide the block)
+            setTickSpeed(TickSpeed.Sliding);        // collision: make it faster + committing (1 tick more: still a chance for the user to slide the block)
             setIsCommitting(true);
         } else {
-            dispatchBoardState({type: 'drop'});     // no collision: drop forward
+            dispatchBoardState({type: 'drop'});     // no collision: drop the actual Block 1 row down
         }
     }, [ board,
         commitPosition,
@@ -193,9 +210,9 @@ export function useTetris() {
     // ~~~~~~~~~~
     // Rendering
 
-    const renderedBoard = structuredClone(board) as BoardShape;
+    const renderedBoard = structuredClone(board) as BoardShape;     // deep copy
 
-    if (isPlaying) {    // Commit: the Block will be a part of the Board
+    if (isPlaying) {    // Commit: the Block will be part of the temporary board
         addShapeToBoard(
             renderedBoard,
             droppingRow,
@@ -219,7 +236,7 @@ export function useTetris() {
 
 // -- Outer helper functions --
 
-// Commit: the Block will be a part of the Board
+// Commit: the Block will be part of the Board
 function addShapeToBoard(
     board: BoardShape,
     droppingRow: number,
@@ -228,7 +245,7 @@ function addShapeToBoard(
     droppingShape: BlockShape
 ) { 
     droppingShape
-        .filter((row) => row.some((isSet) => isSet))    // sort out rows with only void cells ("false" in Shape)
+        .filter((row) => row.some((isSet) => isSet))    // filter out rows with only void cells ("false" in Shape)
         .forEach((row: boolean[], rowIndex: number) => {
             row.forEach((isSet: boolean, colIndex: number) => {
                 if (isSet) {

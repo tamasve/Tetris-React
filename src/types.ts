@@ -9,7 +9,7 @@ export enum Block {
     Q = 'Q',
     U = 'U',
     H = 'H',
-    P = 'P',
+    P = 'P',    // +
     F = 'F',
 }
 
@@ -93,9 +93,9 @@ export const SHAPES: ShapesObj = {
 
     Q: {
         shape: [
-            [true, false, false],
+            [false, false, false],
             [true, true, false],
-            [true, true, false],
+            [true, true, true],
         ]
     },
     U: {
