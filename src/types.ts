@@ -1,3 +1,5 @@
+// the block forms
+
 export enum Block {
     I = 'I',
     J = 'J',
@@ -17,9 +19,15 @@ export enum EmptyCell {
     Empty = 'Empty'
 }
 
+// a cell in the main structure can be empty or filled with a part of a block
+
 export type CellOptions = Block | EmptyCell;
 
+// the main 2D structure
+
 export type BoardShape = CellOptions[][];
+
+// the 2D structures of the blocks
 
 export type BlockShape = boolean[][];   // to describe the shapes as 2D forms: true if it fills the cell and false if it does not
 
